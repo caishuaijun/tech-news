@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    .zb-control>.zb-control__target {
+      height: 0;
+      overflow: hidden;
+    }
+
+    .zb-control:focus-within>.zb-control__target {
+      height: auto;
+      overflow: visible;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="app" class="container my-6 content">
+    <div v-if="data">
+
+      <div class="columns">
+        <div class="column">
+          <span v-if="status" :class="['tag', status === 'saved!' ? 'is-success' : 'is-warning']" style="position: fixed; top: 2rem; left: 2rem;">
+            {{ status }}
+          </span>
+
+          <h2>收集 & 评论</h2>
+          
+          <h3>Articles</h3>
+          <ul>
+            <template v-for="article in data.articles">
+              <li>
+                <div>
+                  <span v-if="comments[article.link].comment">✅</span>
+                  <span class="tag is-link is-light mr-1" v-html="article.category"></span>
+                  <template v-if="article.title">
+                    <span class="has-text-black has-text-link ">{{ article.title }}</span>
+                    <span class="tag is-light ml-1">{{ article.source }}</span>
+                    <span class="tag is-iight ml-1" v-html="article.author"></span>
+                  </template>
+                </div>
+                <div class="zb-control">
+                  <p tabindex="1">
+                    <span v-html="article.description"></span>
+                    <a v-if="article.link" class="is-size-7 ml-3" :href="article.link" target="_blank">阅读原文 →</a>
+                  </p>
+                  <div class="zb-control__target">
+                    <div class="field">
+                      <p class="control">
+                        <input class="input" placeholder="标题" v-model="comments[article.link].title" />
+                      </p>
+                    </div>
+                    <div class="field">
+                      <p class="control">
+                        <input class="input" placeholder="链接" v-model="comments[article.link].realLink" />
+                      </p>
+                    </div>
+                    <div class="select mb-1">
+                      <select v-model="comments[article.link].category">
+                        <option>文章</option>
+                        <option>快讯</option>
+                        <option>发布</option>
+                        <option>资源</option>
+                        <option>工具</option>
+                        <option>库</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <p class="control">
+                        <textarea class="textarea" placeholder="我的想法" v-model="comments[article.link].comment"></textarea>
+                      </p>
+                    </div>
+                    <button class="button is-small is-light">提交</button>
+                  </div>
+                </div>
+              </li>
+            </template>
+  
+          </ul>
+
+        </div>
+        <div class="column">
+          <h2>预览 & 导出</h2>
+    
+          <input class="input mb-3" type="text" placeholder="标题">
+          <div class="buttons">
+            <button class="button is-primary" @click="output">导出 Markdown</button>
+          </div>
+
+          <div id="preview" ref="previewRef">
+            <template v-for="category in formatCategories">
+              <h2>{{ category }}</h2>
+              <ul>
+                <li v-for="article in formatComments[category]">
+                  <p v-if="article.img"><img :src="article.img" alt=""></p>
+                  <p><a :href="article.realLink || article.link" v-html="article.title" :title="article.title" target="_blank"></a> <span v-if="article.comment.trim()">-</span> <span v-html="article.comment.trim()" /></p>
+                </li>
+              </ul>
+            </template>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div v-else>
+      loading...
+    </div>
+  </div>
+
+  <script>
+    function fetchData() {
+      return new Promise(resolve => {
+        fetch('./dist/weeklyFeed.json')
+          .then(response => response.json())
+          .then(data => resolve(data))
+      })
+    }
+  </script>
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script type="module">
+    import { createApp } from 'vue'
+
+    const CACHE_KEY = '__weekly_cache'
+
+    createApp({
+      data() {
+        return {
+          data: {},
+          comments: {},
+          timer: null,
+          status: null
+        }
+      },
+      mounted() {
+        this.getCacheData()
+        this.fetchData()
+      },
+      computed: {
+        formatComments() {
+          return Object.entries(this.comments).reduce((res, [link, { category, ...others }]) => {
+            if (!res[category]) {
+              res[category] = []
+            }
+
+            res[category].push({ link, ...others })
+
+            return res
+          }, {})
+        },
+        formatCategories() {
+          const categories = Object.keys(this.formatComments)
+          return ['快讯', '文章', '发布', '资源', '工具', '库'].filter(i => categories.includes(i))
+        }
+      },
+      watch: {
+        comments: {
+          handler(newValue, oldValue) {
+            this.autosave(newValue)
+          },
+          deep: true
+        }
+      },
+      methods: {
+        async fetchData() {
+          const data = await fetchData()
+          console.log(data)
+          this.data = data
+          this.initComments()
+        },
+        getCacheData() {
+          const cachedComments = localStorage.getItem(CACHE_KEY)
+          if (cachedComments) {
+            // console.log(JSON.parse(cachedComments))
+            this.comments = JSON.parse(cachedComments)
+          }
+        },
+        initComments() {
+          this.data.articles.forEach(article => {
+            if (!this.comments[article.link]) {
+              this.comments[article.link] = {
+                ...article,
+                category: '文章',
+                title: article.title ?? article.description,
+                realLink: article.link,
+                comment: ''
+              }
+            }
+          });
+        },
+        autosave(value) {
+          clearTimeout(this.timer)
+          this.status = 'waiting...'
+          this.timer = setTimeout(() => {
+            this.status = 'saved!'
+            localStorage.setItem(CACHE_KEY, JSON.stringify(value))
+          }, 1500)
+        },
+        output() {
+          console.log(this.$refs['previewRef'])
+
+          const markdown = new TurndownService().keep(['sup']).turndown(this.$refs['previewRef'].innerHTML)
+
+          navigator.clipboard.writeText(markdown)
+            .then(console.log)
+            .catch(console.log)
+
+          // console.log(markdown)
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+
+</html>

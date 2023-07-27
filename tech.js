@@ -9,7 +9,7 @@ const fs = require('node:fs/promises');
   const [response1, response2] = await Promise.all([ axios.get(FeUrl), axios.get(JsUrl) ])
   const { window: { document: feDoc } } = new JSDOM(response1.data, { FeUrl })
   const { window: { document: jsDoc } } = new JSDOM(response2.data, { JsUrl })
-  const weeklyFeed = getWeekly(jsDoc, feDoc)
+  const weeklyFeed = getWeekly(/* jsDoc, */feDoc)
 
   await fs.rm('./dist', { recursive: true });
   console.log(`successfully deleted ./dist`);

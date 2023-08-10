@@ -23,5 +23,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Execute command
+      - name: Install deps
+        run: node tech.js
+
+      - name: Generate Weekly News
         run: node tech.js

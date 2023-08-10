@@ -24,7 +24,7 @@ jobs:
           node-version: 18
 
       - name: Install deps
-        run: node tech.js
+        run: npm install
 
       - name: Generate Weekly News
         run: node tech.js

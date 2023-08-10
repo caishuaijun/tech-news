@@ -1,0 +1,27 @@
+name: Schedule Task
+
+on:
+  push:
+    branches:
+      - main # Replace with your branch name
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 4,5' # Executes at 00:00 UTC on Thursdays and Fridays
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+      - name: Execute command
+        run: node tech.js

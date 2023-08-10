@@ -9,7 +9,7 @@ on:
       - main
   schedule:
     - cron: '0 0 * * 4,5' # Executes at 00:00 UTC on Thursdays and Fridays
-
+    
 permissions:
   contents: write
 
@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
@@ -32,7 +32,7 @@ jobs:
       - name: Generate Weekly News
         run: node tech.js
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.4.3
+        uses: JamesIves/github-pages-deploy-action@4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.

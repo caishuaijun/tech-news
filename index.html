@@ -123,7 +123,7 @@
   <script>
     function fetchData() {
       return new Promise(resolve => {
-        fetch('./dist/weeklyFeed.json')
+        fetch('./weeklyFeed.json')
           .then(response => response.json())
           .then(data => resolve(data))
       })

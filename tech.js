@@ -32,4 +32,7 @@ const fs = require('node:fs/promises');
 
   await fs.writeFile('./dist/weeklyFeed.json', JSON.stringify(weeklyFeed));
   console.log(`successfully write js.json`);
+
+  await fs.copyFile('./template/index.html', `./dist/index.html`);
+  console.log(`successfully copy asset files`);
 })()

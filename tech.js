@@ -11,7 +11,7 @@ const fs = require('node:fs/promises');
   const { window: { document: jsDoc } } = new JSDOM(response2.data, { JsUrl })
 
   const today = new Date();
-  const dayOfWeek = today.getDay();
+  const dayOfWeek = today.getUTCDay();
 
   let docs = []
 

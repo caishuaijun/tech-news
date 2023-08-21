@@ -2,5 +2,5 @@
 
 ```bash
 node tech.js
-npx serve .
+npx serve dist
 ```

@@ -21,8 +21,12 @@ const fs = require('node:fs/promises');
     docs = [jsDoc, feDoc]
   }
 
-  const weeklyFeed = getWeekly(...docs)
+  if (docs.length === 0) {
+    console.log('do nothing')
+    return 
+  }
 
+  const weeklyFeed = getWeekly(...docs)
 
   await fs.rm('./dist', { recursive: true });
   console.log(`successfully deleted ./dist`);

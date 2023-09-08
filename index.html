@@ -95,7 +95,8 @@
           <h2>预览 & 导出</h2>
     
           <div class="buttons">
-            <button class="button is-primary" @click="output">导出 Markdown</button>
+            <button class="button is-info" @click="output">导出 Markdown</button>
+            <button class="button" @click="clearComments">Clear</button>
           </div>
 
           <div id="preview" ref="previewRef">
@@ -186,9 +187,12 @@
             this.comments = JSON.parse(cachedComments)
           }
         },
-        initComments() {
+        clearComments() {
+          this.initComments(true)
+        },
+        initComments(force = false) {
           this.data.articles.forEach(article => {
-            if (!this.comments[article.link]) {
+            if (force || !this.comments[article.link]) {
               this.comments[article.link] = {
                 ...article,
                 category: '文章',

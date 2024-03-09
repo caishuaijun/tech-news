@@ -2,10 +2,15 @@
   "name": "little-writer",
   "version": "0.1.0",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "build": "npm-run-all build:news build:html",
+    "build:news": "node tech.js",
+    "build:html": "cpy ./index.html dist"
+  },
   "dependencies": {
     "@types/node": "20.3.3",
     "axios": "^1.4.0",
-    "jsdom": "^22.1.0"
+    "jsdom": "^22.1.0",
+    "npm-run-all": "^4.1.5"
   }
 }

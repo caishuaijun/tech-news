@@ -71,7 +71,7 @@
                     <div class="select mb-1">
                       <select v-model="comments[article.link].category">
                         <option>文章</option>
-                        <option>快讯</option>
+                        <option>行业动态</option>
                         <option>发布</option>
                         <option>资源</option>
                         <option>工具</option>
@@ -195,11 +195,10 @@
           this.initComments(true)
         },
         clearCache() {
+          let text;
           if (confirm("Confirm clear Cache?") === true) {
             localStorage.removeItem(CACHE_KEY)
-            setTimeout(() => {
-              window.location.reload()
-            }, 0)
+          window.location.reload()
           }
 
         },

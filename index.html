@@ -5,16 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <style>
-    .zb-control>.zb-control__target {
-      height: 0;
-      overflow: hidden;
+    details>summary {
+      list-style-type: '🫣';
     }
 
-    .zb-control:focus-within>.zb-control__target {
-      height: auto;
-      overflow: visible;
+    details[open]>summary {
+      list-style-type: '🧐';
     }
   </style>
   <script type="importmap">
@@ -48,44 +46,47 @@
                   <span class="tag is-link is-light mr-1" v-html="article.category"></span>
                   <template v-if="article.title">
                     <span class="has-text-black has-text-link ">{{ article.title }}</span>
+                    <a v-if="article.link" class="is-size-7 ml-3" :href="article.link" target="_blank">| 点击阅读原文</a>
                     <span class="tag is-light ml-1">{{ article.source }}</span>
                     <span class="tag is-iight ml-1" v-html="article.author"></span>
                   </template>
                 </div>
-                <div class="zb-control">
-                  <p tabindex="1">
-                    <span v-html="article.description"></span>
-                    <a v-if="article.link" class="is-size-7 ml-3" :href="article.link" target="_blank">阅读原文 →</a>
-                  </p>
-                  <div class="zb-control__target">
-                    <div class="field">
-                      <p class="control">
-                        <input class="input" placeholder="标题" v-model="comments[article.link].title" />
-                      </p>
+                <div>
+                  <details>
+                    <summary><span v-html="article.description" style="user-select: all;" /></summary>
+                    <div class="">
+                      <div>
+                        <div class="field">
+                          <p class="control">
+                            <input class="input" placeholder="标题" v-model="comments[article.link].title" />
+                          </p>
+                        </div>
+                        <div class="field">
+                          <p class="control">
+                            <input class="input" placeholder="链接" v-model="comments[article.link].realLink" />
+                          </p>
+                        </div>
+                        <div class="field">
+                          <div class="select">
+                            <select v-model="comments[article.link].category">
+                              <option>文章</option>
+                              <option>行业动态</option>
+                              <option>发布</option>
+                              <option>资源</option>
+                              <option>工具</option>
+                              <option>库</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="field">
+                          <p class="control">
+                            <textarea class="textarea" placeholder="我的想法"
+                              v-model="comments[article.link].comment"></textarea>
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div class="field">
-                      <p class="control">
-                        <input class="input" placeholder="链接" v-model="comments[article.link].realLink" />
-                      </p>
-                    </div>
-                    <div class="select mb-1">
-                      <select v-model="comments[article.link].category">
-                        <option>文章</option>
-                        <option>行业动态</option>
-                        <option>发布</option>
-                        <option>资源</option>
-                        <option>工具</option>
-                        <option>库</option>
-                      </select>
-                    </div>
-                    <div class="field">
-                      <p class="control">
-                        <textarea class="textarea" placeholder="我的想法"
-                          v-model="comments[article.link].comment"></textarea>
-                      </p>
-                    </div>
-                    <button class="button is-small is-light">提交</button>
-                  </div>
+                  </details>
                 </div>
               </li>
             </template>
@@ -98,7 +99,6 @@
 
           <div class="buttons">
             <button class="button is-info" @click="output">导出 Markdown</button>
-            <button class="button" @click="clearComments">Clear Comments</button>
             <button class="button is-danger" @click="clearCache">Clear Cache</button>
           </div>
 
@@ -106,12 +106,14 @@
             <template v-for="category in formatCategories">
               <h2>{{ category }}</h2>
               <ul>
-                <li v-for="article in formatComments[category]">
+                <template v-for="article in formatComments[category]">
                   <p v-if="article.img"><img :src="article.img" alt=""></p>
-                  <p><a :href="article.realLink || article.link" v-html="article.title" :title="article.title"
-                      target="_blank"></a> <span v-if="article.comment.trim()">-</span> <span
-                      v-html="article.comment.trim()" /></p>
-                </li>
+                  <li>
+                    <p><a :href="article.realLink || article.link" v-html="article.title" :title="article.title"
+                        target="_blank"></a> <span v-if="article.comment.trim()">-</span> <span
+                        v-html="article.comment.trim()" /></p>
+                  </li>
+                </template>
               </ul>
             </template>
           </div>
@@ -191,20 +193,21 @@
             this.comments = JSON.parse(cachedComments)
           }
         },
-        clearComments() {
-          this.initComments(true)
-        },
         clearCache() {
           let text;
           if (confirm("Confirm clear Cache?") === true) {
             localStorage.removeItem(CACHE_KEY)
-          window.location.reload()
+
+            // 延迟重载，否则上一步移除缓存数据的操作可能会失败
+            setTimeout(() => {
+              window.location.reload()
+            }, 660)
           }
 
         },
-        initComments(force = false) {
+        initComments() {
           this.data.articles.forEach(article => {
-            if (force || !this.comments[article.link]) {
+            if (!this.comments[article.link]) {
               this.comments[article.link] = {
                 ...article,
                 category: '文章',

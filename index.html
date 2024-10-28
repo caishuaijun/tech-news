@@ -105,7 +105,7 @@
           <div id="preview" ref="previewRef">
             <template v-for="category in formatCategories">
               <h2>{{ category }}</h2>
-              <ul>
+              <ol>
                 <template v-for="article in formatComments[category]">
                   <li>
                     <p><a :href="article.realLink || article.link" v-html="article.title" :title="article.title"
@@ -114,7 +114,7 @@
                     <p v-if="article.comment.trim()" v-html="article.comment.trim()" />
                   </li>
                 </template>
-              </ul>
+              </ol>
             </template>
           </div>
 

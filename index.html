@@ -107,11 +107,11 @@
               <h2>{{ category }}</h2>
               <ul>
                 <template v-for="article in formatComments[category]">
-                  <p v-if="article.img"><img :src="article.img" alt=""></p>
                   <li>
                     <p><a :href="article.realLink || article.link" v-html="article.title" :title="article.title"
-                        target="_blank"></a> <span v-if="article.comment.trim()">-</span> <span
-                        v-html="article.comment.trim()" /></p>
+                        target="_blank"></a><P>
+                    <img v-if="article.img" :src="article.img" alt="" style="display: block;">
+                    <p v-if="article.comment.trim()" v-html="article.comment.trim()" />
                   </li>
                 </template>
               </ul>

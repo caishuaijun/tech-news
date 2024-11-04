@@ -106,18 +106,21 @@
           <div id="preview" ref="previewRef">
             <template v-for="category in formatCategories">
               <h2>{{ category }}</h2>
+	      <br>
               <template v-for="(article, idx) in formatComments[category]">
-                <br>
                 <p><a :href="article.realLink || article.link" v-html="`${idx + 1}、${article.title}`"
                     :title="article.title" target="_blank"></a>
-                <p>
+                </p>
+                <br>
+                <template v-if="article.img">
+		  <p><img :src="article.img" alt="" style="display: block;" />
+		  <br>
+		</template>
+		<template v-if="article.comment.trim()">
+                  <p v-html="article.comment.trim()" />
                   <br>
-                <p v-if="article.img"><img :src="article.img" alt="" style="display: block;"></p>
-                <br>
-                <p v-if="article.comment.trim()" v-html="article.comment.trim()" />
-                <br>
+		</template>
               </template>
-              </ol>
             </template>
           </div>
 
